@@ -15,11 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker-image: [django, nginx, integration-tests]
-        os: [alpine, debian]
-        exclude:
-          - docker-image: integration-tests
-            os: alpine
+        docker-image: [django, nginx]
+        os: debian
+
 
     steps:
       - name: Checkout
