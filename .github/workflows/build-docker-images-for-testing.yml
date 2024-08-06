@@ -71,11 +71,28 @@ jobs:
           name: trivy-results-${{ matrix.docker-image }}.sarif
           path: trivy-results-${{ matrix.docker-image }}.sarif
           
-      - uses: actions/checkout@v4
-      - name: detect-secrets
-        uses: reviewdog/action-detect-secrets@master
+      #- uses: actions/checkout@v4
+      #- name: detect-secrets
+      #  uses: reviewdog/action-detect-secrets@master
+      #  with:
+      #   reporter: github-pr-review # Change reporter.
+           
+      
+     # Installs secret scanner on the runner
+      - name: Install Whispers
+        run: sudo pip install whispers
+       
+     # Scan repo for secrets
+      - name: Run scanner for the repository
+        run: whispers ${{ github.workspace }} > scan_output.json
+
+     # Upload Artifacts
+      - name: Upload the scan output
+        uses: actions/upload-artifact@v3
         with:
-          reporter: github-pr-review # Change reporter.
+          name: scan_results
+          path: scan_output.json
+          retention-days: 2
 
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
