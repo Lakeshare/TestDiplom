@@ -46,7 +46,12 @@ jobs:
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
           cache-from: type=gha,scope=${{ matrix.docker-image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
-  
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+            image-ref: ${{ matrix.docker-image }}-${{ matrix.os }}_img
+            
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10
