@@ -50,14 +50,13 @@ jobs:
       - name: list current files
         run: |
           ls -la
-          ls -la django/
-          ls -la nginx/
+          docker image ls 
         
       
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-            image-ref: django/${{ matrix.docker-image }}-${{ matrix.os }}_img
+            image-ref: ${{ matrix.docker-image }}-${{ matrix.os }}_img
             
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
