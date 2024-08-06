@@ -66,9 +66,11 @@ jobs:
             output: 'trivy-results-${{ matrix.docker-image }}.sarif'
             
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses:  actions/upload-artifact@v3
         with:
-          sarif_file: 'trivy-results-${{ matrix.docker-image }}.sarif'
+          name: trivy-results-${{ matrix.docker-image }}.sarif
+          path: trivy-results-${{ matrix.docker-image }}.sarif
+          
           
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
