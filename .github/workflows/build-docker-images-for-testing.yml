@@ -71,7 +71,12 @@ jobs:
           name: trivy-results-${{ matrix.docker-image }}.sarif
           path: trivy-results-${{ matrix.docker-image }}.sarif
           
-          
+      - uses: actions/checkout@v4
+      - name: detect-secrets
+        uses: reviewdog/action-detect-secrets@master
+        with:
+          reporter: github-pr-review # Change reporter.
+
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10
