@@ -16,8 +16,7 @@ jobs:
     strategy:
       matrix:
         docker-image: [django, nginx]
-        os: debian
-
+        os: [debian]
 
     steps:
       - name: Checkout
