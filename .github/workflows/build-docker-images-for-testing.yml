@@ -47,10 +47,17 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.docker-image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
 
+      - name: list current files
+        run: |
+          ls -la
+          ls -la django/
+          ls -la nginx/
+        
+      
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-            image-ref: ${{ matrix.docker-image }}-${{ matrix.os }}_img
+            image-ref: django/${{ matrix.docker-image }}-${{ matrix.os }}_img
             
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
