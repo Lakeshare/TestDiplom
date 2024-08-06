@@ -62,6 +62,8 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
             image-ref: defectdojo/defectdojo-${{ matrix.docker-image }}:debian
+            severity: 'CRITICAL,HIGH'
+            output: 'trivy-results-${{ matrix.docker-image }}.sarif'
             
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
