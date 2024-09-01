@@ -1,4 +1,4 @@
-name: "Build Docker Images For Testing"
+name: "Build Docker Images & Security Checks"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    # build with docker so we can use layer caching
+   
     name: Build Docker Images
     runs-on: ubuntu-latest
     strategy:
@@ -46,16 +46,12 @@ jobs:
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
           cache-from: type=gha,scope=${{ matrix.docker-image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.docker-image }}
-
-      #- name: list current files
-      #   run: |
-      #    ls -la
-      #    docker image ls 
         
       - name: Load docker images
         timeout-minutes: 10
         run: docker load -i ${{ matrix.docker-image }}-${{ matrix.os }}_img
-      
+
+      # SAST
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
@@ -67,54 +63,31 @@ jobs:
         uses:  actions/upload-artifact@v3
         with:
           name: trivy-results-${{ matrix.docker-image }}.sarif
-          path: trivy-results-${{ matrix.docker-image }}.sarif
-          
-      #- uses: actions/checkout@v4
-      #- name: detect-secrets
-      #  uses: reviewdog/action-detect-secrets@master
-      #  with:
-      #   reporter: github-pr-review # Change reporter.
-           
-      
-     # Installs secret scanner on the runner
+          path: trivy-results-${{ matrix.docker-image }}.sarif    
+
+      # Secrets
       - name: Install Whispers
         run: sudo pip install whispers
        
-     # Scan repo for secrets
       - name: Run scanner for the repository
         run: whispers ${{ github.workspace }} > scan_output.json
 
-     # Upload Artifacts
-      - name: Upload the scan output
-        uses: actions/upload-artifact@v3
-        with:
-          name: scan_results
-          path: scan_output.json
-          retention-days: 2
-
+      # DAST
       - name: Start your service
         run: ./dc-up-d.sh postgres-redis                
-      
-      #- name: list listen ports
-      #  run: |
-      #    ss -nltu 
-
-      #- name: list listen ports
-      #  run: |
-      #    docker run -v $(pwd):/zap/wrk/:rw -t ubuntu:20.04 echo $USER
           
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0     
         with:
           options: --user root -v ${{ github.workspace }}:/zap/wrk/:rw
-          # Target URL
           target: "http://localhost:8080"
 
-      # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
         timeout-minutes: 10
         uses:  actions/upload-artifact@v3
         with:
           name: ${{ matrix.docker-image }}
-          path: ${{ matrix.docker-image }}-${{ matrix.os }}_img
+          path: |
+           ${{ matrix.docker-image }}-${{ matrix.os }}_img
+           scan_output.json
           retention-days: 1
