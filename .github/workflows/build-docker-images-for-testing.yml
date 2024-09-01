@@ -95,15 +95,18 @@ jobs:
           retention-days: 2
 
       - name: Start your service
-        run: ./dc-up-d.sh postgres-redis                  # ✏️ Update this to run your own service to be scanned
+        run: ./dc-up-d.sh postgres-redis                
+      
+      - name: list listen ports
+        run: |
+          ss -nltu 
 
-      - name: Run HawkScan
-        uses: stackhawk/hawkscan-action@4c3258cd62248dac6d9fe91dd8d45928c697dee0
-        continue-on-error: true                   # ✏️ Set to false to break your build on scan errors
+      - name: OWASP ZAP Baseline Scan
+        # You may pin to the exact commit or the version.
+        uses: zaproxy/action-baseline@v0.12.0
         with:
-          apiKey: ${{ secrets.HAWK_API_KEY }}
-          codeScanningAlerts: true
-          githubToken: ${{ github.token }}
+          # Target URL
+          target: "https://localhost:8080"
 
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
