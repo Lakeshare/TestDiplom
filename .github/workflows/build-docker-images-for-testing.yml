@@ -52,11 +52,9 @@ jobs:
       #    ls -la
       #    docker image ls 
         
-      #- name: Load docker images
-      #  timeout-minutes: 10
-      #  run: |-
-      #       docker load -i ${{ matrix.docker-image }}-${{ matrix.os }}_img
-      #       docker images
+      - name: Load docker images
+        timeout-minutes: 10
+        run: docker load -i ${{ matrix.docker-image }}-${{ matrix.os }}_img
       
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
