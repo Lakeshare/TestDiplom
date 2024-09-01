@@ -101,9 +101,9 @@ jobs:
         run: |
           ss -nltu 
 
-      - name: list listen ports
-        run: |
-          docker run -v $(pwd):/zap/wrk/:rw -t ubuntu:20.04 echo $USER
+      #- name: list listen ports
+      #  run: |
+      #    docker run -v $(pwd):/zap/wrk/:rw -t ubuntu:20.04 echo $USER
           
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0     
