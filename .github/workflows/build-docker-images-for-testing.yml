@@ -73,7 +73,7 @@ jobs:
         run: whispers ${{ github.workspace }} > scan_output.json
 
       # DAST
-      - name: Start your service
+      - name: Start defect-dojo
         run: ./dc-up-d.sh postgres-redis                
           
       - name: OWASP ZAP Baseline Scan
