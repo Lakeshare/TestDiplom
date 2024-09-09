@@ -91,9 +91,13 @@ jobs:
            ${{ matrix.docker-image }}-${{ matrix.os }}_img
            scan_output.json
           retention-days: 1
+      
+      - name: List docker images
+        timeout-minutes: 10
+        run: docker images
 
       - name: Save Docker image as tar file
-        run: docker save -o  ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar  ${{ matrix.docker-image }}-${{ matrix.os }}_img
+        run: docker save -o  ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar  defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
       
       - name: Transfer Docker image to remote server
         run: |
