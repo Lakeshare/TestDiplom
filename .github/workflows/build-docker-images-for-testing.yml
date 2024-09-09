@@ -108,6 +108,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           scp -o StrictHostKeyChecking=no ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar root@87.249.53.162:/root/
           scp -o StrictHostKeyChecking=no docker/environments/postgres-redis.env root@87.249.53.162:/root/docker/environments/
+          scp -o StrictHostKeyChecking=no docker-compose.yml root@87.249.53.162:/root/
           
       - name: Load Docker image on remote server
         run: |
