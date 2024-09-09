@@ -24,6 +24,13 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+          docker context create remote --docker host=ssh://root@87.249.53.162
+     
       - name: Read Docker Image Identifiers
         id: read-docker-image-identifiers
         run: echo "IMAGE_REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
@@ -32,15 +39,15 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           buildkitd-flags: --debug
-          driver-opts: image=moby/buildkit:master # needed to get the fix for https://github.com/moby/buildkit/issues/2426
+          driver-opts: image=moby/buildkit:master 
           
       - name: Build
         id: docker_build
         uses: docker/build-push-action@v6
         timeout-minutes: 10
         with:
-          context: .
-          push: false
+          context: remote
+          #push: false
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
