@@ -96,7 +96,7 @@ jobs:
         timeout-minutes: 10
         run: |
           docker images
-          echo "${{ secrets.PRIVATE_KEY }}"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Save Docker image as tar file
         run: docker save -o  ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar  defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
@@ -104,8 +104,8 @@ jobs:
       - name: Transfer Docker image to remote server
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           scp -o StrictHostKeyChecking=no ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar root@87.249.53.162:/root/
 
       - name: Load Docker image on remote server
