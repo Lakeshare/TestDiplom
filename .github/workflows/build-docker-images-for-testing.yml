@@ -107,13 +107,12 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           scp -o StrictHostKeyChecking=no ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar root@87.249.53.162:/root/
-          scp -o StrictHostKeyChecking=no docker/* root@87.249.53.162:/root/docker/
-          scp -o StrictHostKeyChecking=no dc-up-d.sh root@87.249.53.162:/root/
-
+          scp -o StrictHostKeyChecking=no docker/environments/postgres-redis.env root@87.249.53.162:/root/docker/environments/
+          
       - name: Load Docker image on remote server
         run: |
           ssh -o StrictHostKeyChecking=no root@87.249.53.162 << 'ENDSSH'
           docker load -i /root/${{ matrix.docker-image }}-${{ matrix.os }}_img.tar
-          ./dc-up-d.sh postgres-redis
+          docker compose --profile postgres-redis --env-file "./docker/environments/postgres-redis.env" up --no-deps -d
           ENDSSH
       
