@@ -23,13 +23,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-
-      - name: Install ssh keys
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
-          docker context create remote --docker host=ssh://root@87.249.53.162
      
       - name: Read Docker Image Identifiers
         id: read-docker-image-identifiers
@@ -46,8 +39,8 @@ jobs:
         uses: docker/build-push-action@v6
         timeout-minutes: 10
         with:
-          context: remote
-          #push: false
+          context: .
+          push: false
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}_img
@@ -98,3 +91,20 @@ jobs:
            ${{ matrix.docker-image }}-${{ matrix.os }}_img
            scan_output.json
           retention-days: 1
+
+      - name: Save Docker image as tar file
+        run: docker save -o  ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar  ${{ matrix.docker-image }}-${{ matrix.os }}_img
+      
+      - name: Transfer Docker image to remote server
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no ${{ matrix.docker-image }}-${{ matrix.os }}_img.tar root@87.249.53.162:/root/
+
+      - name: Load Docker image on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no root@87.249.53.162 << 'ENDSSH'
+          docker load -i /root/${{ matrix.docker-image }}-${{ matrix.os }}_img.tar
+          ENDSSH
+      
